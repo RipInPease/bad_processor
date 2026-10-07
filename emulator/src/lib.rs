@@ -1,6 +1,6 @@
 mod run_instruction;
 
-struct CPU {
+pub struct CPU {
     registers: Registers,
     ram: RAM,
     state: ExecutionState,
@@ -43,81 +43,132 @@ impl Registers {
 
 
     /// Increments the program counter by 1
+    #[inline(always)]
     pub fn increment_pc(&mut self) {
         self.program_counter += 1;
     }
 
     /// Reset all status flags from process_status register
+    #[inline(always)]
     pub fn clear_flags(&mut self) {
         self.process_status = 0;
     }
 
+    /// Returns `true` if carry_flag is on
+    pub fn carry_flag(&self) -> bool {
+        self.process_status >> Self::CARRY_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the carry flag
+    #[inline(always)]
     pub fn set_carry_flag(&mut self) {
         self.process_status |= 1 << Self::CARRY_FLAG_BIT_POSITION;
     }
 
     /// Reset the carry flag
+    #[inline(always)]
     pub fn reset_carry_flag(&mut self) {
-        self.process_status &= !(1 << Self::CARRY_FLAG_BIT_POSITION)
+        self.process_status &= !(1 << Self::CARRY_FLAG_BIT_POSITION);
     }
     
+    /// Returns `true` if zero_flag is on
+    pub fn zero_flag(&self) -> bool {
+        self.process_status >> Self::ZERO_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the zero flag
+    #[inline(always)]
     pub fn set_zero_flag(&mut self) {
         self.process_status |= 1 << Self::ZERO_FLAG_BIT_POSITION;
     }
 
     /// Reset the zero flag
+    #[inline(always)]
     pub fn reset_zero_flag(&mut self) {
         self.process_status &= !(1 << Self::ZERO_FLAG_BIT_POSITION);
     }
 
+    /// Returns `true` if interrupt_disable_flag is on
+    pub fn interrupt_disable_flag(&self) -> bool {
+        self.process_status >> Self::INTERRUPT_DISABLE_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the interrupt disable flag
+    #[inline(always)]
     pub fn set_interrupt_disable_flag(&mut self) {
         self.process_status |= 1 << Self::INTERRUPT_DISABLE_FLAG_BIT_POSITION;
     }
 
     /// Reset the interrupt disable flag
+    #[inline(always)]
     pub fn reset_interrupt_disable_flag(&mut self) {
         self.process_status &= !(1 << Self::INTERRUPT_DISABLE_FLAG_BIT_POSITION);
     }
 
+    /// Returns `true` if decimal_mode_flag is on
+    pub fn decimal_mode_flag(&self) -> bool {
+        self.process_status >> Self::DECIMAL_MODE_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the decimal mode flag
+    #[inline(always)]
     pub fn set_decimal_mode_flag(&mut self) {
         self.process_status |= 1 << Self::DECIMAL_MODE_FLAG_BIT_POSITION;
     }
 
     /// Reset the decimal mode flag
+    #[inline(always)]
     pub fn reset_decimal_mode_flag(&mut self) {
         self.process_status &= !(1 << Self::DECIMAL_MODE_FLAG_BIT_POSITION);
     }
 
+    /// Returns `true` if break_flag is on
+    pub fn break_flag(&self) -> bool {
+        self.process_status >> Self::BREAK_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the break flag
+    #[inline(always)]
     pub fn set_break_flag(&mut self) {
         self.process_status |= 1 << Self::BREAK_FLAG_BIT_POSITION;
     }
 
     /// Reset the break flag
+    #[inline(always)]
     pub fn reset_break_flag(&mut self) {
         self.process_status &= !(1 << Self::BREAK_FLAG_BIT_POSITION);
     }
 
+    /// Returns `true` if overflow_flag is on
+    pub fn overflow_flag(&self) -> bool {
+        self.process_status >> Self::OVERFLOW_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the overflow flag
+    #[inline(always)]
     pub fn set_overflow_flag(&mut self) {
         self.process_status |= 1 << Self::OVERFLOW_FLAG_BIT_POSITION;
     }
 
     /// Reset the overflow flag
+    #[inline(always)]
     pub fn reset_overflow_flag(&mut self) {
         self.process_status &= !(1 << Self::OVERFLOW_FLAG_BIT_POSITION);
     }
 
+    /// Returns `true` if negative_flag is on
+    pub fn negative_flag(&self) -> bool {
+        self.process_status >> Self::NEGATIVE_FLAG_BIT_POSITION & 1 == 1
+    }
+
     /// Set the negative flag
+    #[inline(always)]
     pub fn set_negative_flag(&mut self) {
         self.process_status |= 1 << Self::NEGATIVE_FLAG_BIT_POSITION;
     }
 
     /// Reset the negative flag
+    #[inline(always)]
     pub fn reset_negative_flag(&mut self) {
         self.process_status &= !(1 << Self::NEGATIVE_FLAG_BIT_POSITION);
     }

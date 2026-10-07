@@ -282,12 +282,181 @@ impl CPU {
     }
 
     /// Add with carry
-    fn adc(&mut self, val: u8) {
-        let (res, overflow) = self.registers.accumulator.overflowing_add(val);
+    fn adc(&mut self, rhs: u8) {
+        // Check overflow flag
+        // This is a shitty implementation of i8::overflowing_add 
+        // because it is an experimental feature
+        let (temp, a) = (self.registers.accumulator as i8).overflowing_add(rhs as i8);
+        let (_, b) = temp.overflowing_add(self.registers.carry_flag() as i8);
+        
+        if a != b {
+            self.registers.set_overflow_flag();
+        } else {
+            self.registers.reset_overflow_flag();
+        }
+
+        // Perform the operation
+        let (res, carry) =  self.registers.accumulator.carrying_add(
+            rhs,
+            self.registers.carry_flag()
+        );
         self.registers.accumulator = res;
 
-        if overflow {
+
+        // Check other flags
+        if carry {
             self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
         }
+
+        if self.registers.accumulator == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Logical AND
+    pub fn and(&mut self, rhs: u8) {
+        self.registers.accumulator &= rhs;
+
+        if self.registers.accumulator == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Arithmetic left shift
+    pub fn asl(&mut self, rhs: u8) {
+        // Move bit 7 to carry flag
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
+        }
+
+        // Perform operation
+        self.registers.accumulator <<= rhs;
+
+        // Set flags
+        if self.registers.accumulator == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Branch if carry clear
+    pub fn bcc(&mut self, displacement: i8) {
+        if self.registers.carry_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Branch if carry set
+    pub fn bcs(&mut self, displacement: i8) {
+        if !self.registers.carry_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Branch if zero flag set
+    pub fn beq(&mut self, displacement: i8) {
+        if !self.registers.zero_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Bit test
+    pub fn bit(&mut self, rhs: u8) {
+        let res = self.registers.accumulator & rhs;
+
+        // Flags
+        if res == 0 {
+            self.registers.set_zero_flag();
+        }else {
+            self.registers.reset_zero_flag();
+        }
+
+        if res >> 6 & 1 == 1 {
+            self.registers.set_overflow_flag();
+        } else {
+            self.registers.reset_overflow_flag();
+        }
+
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Branch if not equal
+    pub fn bne(&mut self, displacement: i8) {
+        if self.registers.zero_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Branch if positve
+    pub fn bpl(&mut self, displacement: i8) {
+        if self.registers.negative_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Force interrupt
+    pub fn brk(&mut self) {
+        todo!()
     }
 }
