@@ -286,10 +286,10 @@ impl CPU {
         // Check overflow flag
         // This is a shitty implementation of i8::overflowing_add 
         // because it is an experimental feature
-        let (temp, a) = (self.registers.accumulator as i8).overflowing_add(rhs as i8);
-        let (_, b) = temp.overflowing_add(self.registers.carry_flag() as i8);
+        let (temp, carry1) = (self.registers.accumulator as i8).overflowing_add(rhs as i8);
+        let (_, carry2) = temp.overflowing_add(self.registers.carry_flag() as i8);
         
-        if a != b {
+        if carry1 != carry2 {
             self.registers.set_overflow_flag();
         } else {
             self.registers.reset_overflow_flag();
@@ -341,29 +341,8 @@ impl CPU {
     }
 
     /// Arithmetic left shift
-    pub fn asl(&mut self, rhs: u8) {
-        // Move bit 7 to carry flag
-        if self.registers.accumulator >> 7 & 1 == 1 {
-            self.registers.set_carry_flag();
-        } else {
-            self.registers.reset_carry_flag();
-        }
-
-        // Perform operation
-        self.registers.accumulator <<= rhs;
-
-        // Set flags
-        if self.registers.accumulator == 0 {
-            self.registers.set_zero_flag();
-        } else {
-            self.registers.reset_zero_flag();
-        }
-
-        if self.registers.accumulator >> 7 & 1 == 1 {
-            self.registers.set_negative_flag();
-        } else {
-            self.registers.reset_negative_flag();
-        }
+    pub fn asl(&mut self) {
+        todo!()
     }
 
     /// Branch if carry clear
@@ -681,5 +660,154 @@ impl CPU {
     /// Jump
     pub fn jmp(&mut self, addr: u16) {
         self.registers.program_counter = addr;
+    }
+
+    /// Jump to subroutine
+    pub fn jsr(&mut self, addr: u16) {
+        todo!()
+    }
+
+    /// Load accumulator
+    pub fn lda(&mut self, rhs: u8) {
+        if rhs == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if rhs >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.accumulator = rhs;
+    }
+
+    /// Load X register
+    pub fn ldx(&mut self, rhs: u8) {
+        if rhs == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if rhs >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_x = rhs;
+    }
+
+    /// Load Y register
+    pub fn ldy(&mut self, rhs: u8) {
+        if rhs == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if rhs >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_y = rhs;
+    }
+
+    /// Logical left right
+    pub fn lsr(&mut self) {
+        todo!()
+    }
+
+    /// No operation
+    pub fn nop() {}
+
+    /// Logical inclusive or
+    pub fn ora(&mut self, rhs: u8) {
+        let res = self.registers.accumulator | rhs;
+
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.accumulator = res;
+    }
+
+    /// Push accumulator
+    pub fn pha(&mut self) {
+        todo!()
+    }
+
+    /// Pull accumulator
+    pub fn pla(&mut self) {
+        todo!()
+    }
+
+    /// Rotate left
+    pub fn rol(&mut self) {
+        todo!()
+    }
+
+    /// Rotate right
+    pub fn ror(&mut self) {
+        todo!()
+    }
+
+    /// Subtract with carry
+    pub fn sbc(&mut self, rhs: u8) {
+        // First check overflow
+        // Implementation of i8::borrowing_sub as it is an experimental feature
+        let carry = self.registers.carry_flag();
+
+        let (temp, overflow1) =
+            (self.registers.accumulator as i8).overflowing_sub(rhs as i8);
+        let (_, overflow2) =
+            temp.overflowing_sub(!carry as i8);
+
+        if overflow1 != overflow2 {
+            self.registers.set_overflow_flag();
+        } else {
+            self.registers.reset_overflow_flag();
+        }
+
+        // Perform operation
+        let (res, borrow) = self.registers.accumulator.borrowing_sub(
+            rhs,
+            !carry,
+        );
+
+        self.registers.accumulator = res;
+
+        // Check flags
+        if !borrow {
+            self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
+        }
+
+        // Check flags
+        if self.registers.accumulator == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
     }
 }
