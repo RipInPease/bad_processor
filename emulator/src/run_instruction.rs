@@ -459,4 +459,227 @@ impl CPU {
     pub fn brk(&mut self) {
         todo!()
     }
+
+    /// Branch if overflow clear
+    pub fn bvc(&mut self, displacement: i8) {
+        if self.registers.overflow_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Branch if overflow set
+    pub fn bvs(&mut self, displacement: i8) {
+        if !self.registers.overflow_flag() {
+            return
+        }
+
+        if displacement < 0 {
+            self.registers.program_counter -= (displacement as i16).abs() as u16;
+        } else {
+            self.registers.program_counter += (displacement as i16) as u16;
+        }
+    }
+
+    /// Clear carry flag
+    pub fn clc(&mut self) {
+        self.registers.reset_carry_flag();
+    }
+
+    /// Clear decimal mode
+    pub fn cld(&mut self) {
+        self.registers.reset_decimal_mode_flag();
+    }
+
+    /// Clear interrupt disable
+    pub fn cli(&mut self) {
+        self.registers.reset_interrupt_disable_flag();
+    }
+
+    /// Clear overflow flag
+    pub fn clv(&mut self) {
+        self.registers.reset_overflow_flag();
+    }
+
+    /// Compare
+    pub fn cmp(&mut self, rhs: u8) {
+        let (res, overflow) = self.registers.accumulator.overflowing_sub(rhs);
+
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if !overflow {
+            self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
+        }
+
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Compare X register
+    pub fn cpx(&mut self, rhs: u8) {
+        let (res, overflow) = self.registers.register_x.overflowing_sub(rhs);
+
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if !overflow {
+            self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
+        }
+
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Compare Y register
+    pub fn cpy(&mut self, rhs: u8) {
+        let (res, overflow) = self.registers.register_y.overflowing_sub(rhs);
+
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if !overflow {
+            self.registers.set_carry_flag();
+        } else {
+            self.registers.reset_carry_flag();
+        }
+
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Decrement memory
+    pub fn dec(&mut self) {
+        todo!()
+    }
+
+    /// Decrement X register
+    pub fn dex(&mut self) {
+        let res = self.registers.register_x.overflowing_sub(1).0;
+        
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+        
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_x = res;
+    }
+
+    /// Decrement Y register
+    pub fn dey(&mut self) {
+        let res = self.registers.register_y.overflowing_sub(1).0;
+        
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+        
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_y = res;
+    }
+
+    /// Exclusive or
+    pub fn eor(&mut self, rhs: u8) {
+        self.registers.accumulator ^= rhs;
+
+        if self.registers.accumulator == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+
+        if self.registers.accumulator >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+    }
+
+    /// Increment memory
+    pub fn inc(&mut self) {
+        todo!()
+    }
+
+    /// Increment X register
+    pub fn inx(&mut self) {
+        let res = self.registers.register_x.overflowing_add(1).0;
+        
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+        
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_x = res;
+    }
+
+    /// Increment Y register
+    pub fn iny(&mut self) {
+        let res = self.registers.register_y.overflowing_add(1).0;
+        
+        if res == 0 {
+            self.registers.set_zero_flag();
+        } else {
+            self.registers.reset_zero_flag();
+        }
+        
+        if res >> 7 & 1 == 1 {
+            self.registers.set_negative_flag();
+        } else {
+            self.registers.reset_negative_flag();
+        }
+
+        self.registers.register_y = res;
+    }
+
+    /// Jump
+    pub fn jmp(&mut self, addr: u16) {
+        self.registers.program_counter = addr;
+    }
 }
