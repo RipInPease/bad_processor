@@ -810,4 +810,64 @@ impl CPU {
             self.registers.reset_negative_flag();
         }
     }
+
+    /// Set cary flag
+    pub fn sec(&mut self) {
+        self.registers.set_carry_flag();
+    }
+
+    /// Set decimal flag
+    pub fn sed(&mut self) {
+        self.registers.set_decimal_mode_flag();
+    }
+
+    /// Set interrupt disable
+    pub fn sei(&mut self) {
+        self.registers.set_interrupt_disable_flag();
+    }
+
+    /// Store accumulator
+    pub fn sta(&mut self, addr: u16) {
+        todo!()
+    }
+
+    /// Store X register
+    pub fn stx(&mut self) {
+        todo!()
+    }
+
+    /// Store Y register
+    pub fn sty(&mut self) {
+        todo!()
+    }
+
+    /// Transfer accumulator to X
+    pub fn tax(&mut self) {
+        self.registers.register_x = self.registers.accumulator;
+    }
+
+    /// Transfer accumulator to Y
+    pub fn tay(&mut self) {
+        self.registers.register_y = self.registers.accumulator;
+    }
+
+    /// Transfer stack pointer to X
+    pub fn tsx(&mut self) {
+        self.registers.register_x = self.registers.stack_pointer;
+    }
+
+    /// Transfer X to accumulator
+    pub fn txa(&mut self) {
+        self.registers.accumulator = self.registers.register_x;
+    }
+
+    /// Transfer X to stack pointer
+    pub fn txs(&mut self) {
+        self.registers.stack_pointer = self.registers.register_x;
+    }
+
+    /// Transfer Y to accumulator
+    pub fn tya(&mut self) {
+        self.registers.accumulator = self.registers.register_y;
+    }
 }
