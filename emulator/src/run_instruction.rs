@@ -2,7 +2,16 @@ use super::{CPU, Instruction, AddressingMode};
 
 impl CPU {
     pub fn run_instruction(&mut self) {
+        use super::InstructionState::*;
 
+        match self.state.opcode_state {
+            FethOpCode => {
+                let (instruction, addressing_mode) = self.decode().unwrap();
+                self.state.current_opcode = Some(instruction);
+                self.state.opcode_state = FetchAddress(())
+            },
+            FetchAddress(_) => (),
+        };
     }
 
     /// Decodes the next instruction

@@ -3,7 +3,7 @@ mod run_instruction;
 pub struct CPU {
     registers: Registers,
     ram: RAM,
-    state: ExecutionState,
+    state: CPUState,
 }
 
 
@@ -759,10 +759,28 @@ pub enum Instruction {
 }
 
 
-/// Which state the CPU is in for the current instruction
-pub enum ExecutionState {
-    Fetch,
-    Read,
-    Execute,
-    Write
+/// Which state the CPU is in
+pub struct CPUState {
+    current_opcode: Option<Instruction>,
+    address: Option<u16>,
+    opcode_state: InstructionState
+}
+
+/// How far we've gotten in the current instruction
+pub enum InstructionState {
+    FethOpCode,
+    FetchAccumalator,
+    FetchImmediate,
+}
+
+impl From<AddressingMode> for InstructionState {
+    fn from(value: AddressingMode) -> Self {
+        use AddressingMode::*;
+
+        match AddressingMode {
+            Accumulator => Self::FetchAccumalator,
+            Immediate   => Self::FetchImmediate,
+            
+        }
+    }
 }
